@@ -68,7 +68,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.content) {
-      showError('Error', 'Title and Content are required');
+      showError('Title and Content are required');
       return;
     }
 
@@ -93,19 +93,19 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
         await api.put(`/articles/${initialData._id}`, payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        showSuccess('Updated!', 'Article has been updated successfully');
+        showSuccess('Article has been updated successfully');
       } else {
         await api.post('/articles', payload, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        showSuccess('Created!', 'Article has been created successfully');
+        showSuccess('Article has been created successfully');
       }
       
       router.push('/articles');
     } catch (error: any) {
       hideAlert();
       console.error('Error saving article:', error);
-      showError('Error', error.response?.data?.message || 'Failed to save article');
+      showError(error.response?.data?.message || 'Failed to save article');
     } finally {
       setSubmitting(false);
     }

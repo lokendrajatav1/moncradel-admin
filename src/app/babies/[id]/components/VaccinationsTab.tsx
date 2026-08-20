@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { Syringe, CheckCircle2, Activity, Calendar, UserCircle, FileText, Loader2, Edit2, XCircle } from 'lucide-react';
+import { Syringe, CheckCircle2, Activity, Calendar, UserCircle, FileText, Loader2, Edit2, XCircle, Trash2 } from 'lucide-react';
 import api from '@/utils/api';
 import { showError, showSuccess, showLoading, hideAlert, confirmAction } from '@/utils/alert';
 import Modal from '@/components/Modal';
@@ -15,6 +15,10 @@ interface VaccineScheduleItem {
   description: string;
   computedStatus: string;
   record: any;
+}
+
+interface VaccinationsTabProps {
+  baby: Baby;
 }
 
 export default function VaccinationsTab({ baby }: VaccinationsTabProps) {
@@ -122,6 +126,7 @@ export default function VaccinationsTab({ baby }: VaccinationsTabProps) {
     setFormData({
       vaccineName: "",
       givenDate: new Date().toISOString().split('T')[0],
+      rescheduledDate: new Date().toISOString().split('T')[0],
       administeredBy: "",
       notes: ""
     });
