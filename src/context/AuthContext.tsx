@@ -36,15 +36,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const storedUser = localStorage.getItem('user');
 
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      
-      // If user is already logged in, request FCM token
-      requestForToken().then(async fcmToken => {
-        if (fcmToken) {
-          api.put('/users/profile', { fcmToken }).catch(console.error);
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        
+        // Enforce that only admins can use this dashboard
+        if (parsedUser.role !== 'admin') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          if (pathname !== '/login') router.push('/login');
+          setIsLoading(false);
+          return;
         }
-      }).catch(console.error);
+
+        setToken(storedToken);
+        setUser(parsedUser);
+        
+        // If user is already logged in, request FCM token
+        requestForToken().then(async fcmToken => {
+          if (fcmToken) {
+            api.put('/users/profile', { fcmToken }).catch(console.error);
+          }
+        }).catch(console.error);
+      } catch (e) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (pathname !== '/login') router.push('/login');
+      }
     } else {
       // No token, redirect to login if not already there
       if (pathname !== '/login') {
