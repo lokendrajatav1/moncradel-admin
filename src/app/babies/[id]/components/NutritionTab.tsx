@@ -14,6 +14,7 @@ interface NutritionTabProps {
 export default function NutritionTab({ babyId }: NutritionTabProps) {
   const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [recommendedMeals, setRecommendedMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<NutritionPlan | null>(null);
@@ -29,9 +30,10 @@ export default function NutritionTab({ babyId }: NutritionTabProps) {
   const fetchNutritionPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const [planRes, mealRes] = await Promise.all([
+      const [planRes, mealRes, recRes] = await Promise.all([
         api.get(`/nutrition-plans/${babyId}`),
-        api.get('/meals')
+        api.get('/meals'),
+        api.get(`/meals/recommendations/${babyId}`).catch(() => ({ data: { success: false, data: [] } }))
       ]);
       
       if (planRes.data.success) {
@@ -42,6 +44,9 @@ export default function NutritionTab({ babyId }: NutritionTabProps) {
         if (mealRes.data.data.length > 0) {
           setSelectedMealId(mealRes.data.data[0]._id);
         }
+      }
+      if (recRes.data.success) {
+        setRecommendedMeals(recRes.data.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch nutrition data', error);
@@ -238,6 +243,25 @@ export default function NutritionTab({ babyId }: NutritionTabProps) {
           <div>
             <h4 className="text-sm font-semibold text-gray-800 mb-3">Build Weekly Schedule</h4>
             
+            {recommendedMeals.length > 0 && (
+              <div className="mb-4 bg-purple-50 p-3 rounded-lg border border-purple-100">
+                <h5 className="text-xs font-bold text-purple-700 mb-2">Recommended Meals for this Baby</h5>
+                <div className="flex flex-wrap gap-2">
+                  {recommendedMeals.map(rm => (
+                    <button 
+                      type="button" 
+                      key={rm._id}
+                      onClick={() => { setSelectedMealId(rm._id); }}
+                      className={`text-xs px-2.5 py-1.5 rounded border transition-colors ${selectedMealId === rm._id ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-100'}`}
+                    >
+                      {rm.name}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-purple-500 mt-2">Click to select, then use the + button below to add to schedule.</p>
+              </div>
+            )}
+
             <div className="flex gap-2 mb-4">
               <select 
                 value={selectedDay} 

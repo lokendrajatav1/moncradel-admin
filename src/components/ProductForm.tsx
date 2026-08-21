@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { showSuccess, showError, showLoading, hideAlert } from '@/utils/alert';
 import api from '@/utils/api';
 import { X, Image as ImageIcon, GripVertical } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import 'react-quill-new/dist/quill.snow.css';
+
+// Dynamically import react-quill-new to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 interface Product {
   _id?: string;
@@ -178,11 +183,6 @@ export default function ProductForm({ initialData, existingCategories = [] }: Pr
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-          <textarea required rows={4} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Product details (min 10 characters)..." />
-        </div>
-
         <div className="grid grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Regular Price (₹) *</label>
@@ -337,6 +337,25 @@ export default function ProductForm({ initialData, existingCategories = [] }: Pr
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="bg-white mb-8">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description (A+ Content) *</label>
+          <ReactQuill
+            theme="snow"
+            value={formData.description}
+            onChange={(content) => setFormData({ ...formData, description: content })}
+            className="h-64 mb-12"
+            modules={{
+              toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+                ['link'],
+                ['clean']
+              ],
+            }}
+          />
         </div>
 
         <div className="pt-6 border-t border-gray-100 flex justify-end gap-3">

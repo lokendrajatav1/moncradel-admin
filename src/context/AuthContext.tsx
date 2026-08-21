@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (parsedUser.role !== 'admin') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          if (pathname !== '/login') router.push('/login');
+          if (pathname !== '/login') router.replace('/login');
           setIsLoading(false);
           return;
         }
@@ -60,12 +60,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (e) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        if (pathname !== '/login') router.push('/login');
+        if (pathname !== '/login') router.replace('/login');
       }
     } else {
       // No token, redirect to login if not already there
       if (pathname !== '/login') {
-        router.push('/login');
+        router.replace('/login');
       }
     }
     setIsLoading(false);
@@ -136,7 +136,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(userData);
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
-    router.push('/');
+    router.replace('/');
     
     // Request FCM token and save to backend upon login
     requestForToken().then(async fcmToken => {
@@ -151,7 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    router.push('/login');
+    router.replace('/login');
   };
 
   return (

@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { showSuccess, showError, showLoading, hideAlert } from '@/utils/alert';
 import api from '@/utils/api';
 import { X, Image as ImageIcon, GripVertical } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import 'react-quill-new/dist/quill.snow.css';
+
+// Dynamically import react-quill-new to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 interface Meal {
   _id?: string;
@@ -25,6 +30,8 @@ interface Meal {
   };
   imageUrl?: string;
   images?: string[];
+  tags?: string[];
+  allergens?: string[];
 }
 
 interface MealFormProps {
@@ -52,6 +59,8 @@ export default function MealForm({ initialData }: MealFormProps) {
     inStock: initialData?.inStock ?? true,
     isActive: initialData?.isActive ?? true,
     nutritionalInfo: initialData?.nutritionalInfo || { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    tags: initialData?.tags || [],
+    allergens: initialData?.allergens || []
   });
   
   const [images, setImages] = useState<FormImage[]>([]);
@@ -59,8 +68,21 @@ export default function MealForm({ initialData }: MealFormProps) {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper for ingredients text field
-  const [ingredientsText, setIngredientsText] = useState(initialData?.ingredients?.join(', ') || '');
+  // Helper for text fields
+  const parseArrayData = (arr?: string[]) => {
+    if (!arr || arr.length === 0) return '';
+    try {
+      if (arr.length === 1 && arr[0].startsWith('[')) {
+        const parsed = JSON.parse(arr[0]);
+        if (Array.isArray(parsed)) return parsed.join(', ');
+      }
+    } catch (e) {}
+    return arr.join(', ');
+  };
+
+  const [ingredientsText, setIngredientsText] = useState(parseArrayData(initialData?.ingredients));
+  const [tagsText, setTagsText] = useState(parseArrayData(initialData?.tags));
+  const [allergensText, setAllergensText] = useState(parseArrayData(initialData?.allergens));
 
   useEffect(() => {
     if (initialData) {
@@ -134,6 +156,13 @@ export default function MealForm({ initialData }: MealFormProps) {
       
       const ingredientsArray = ingredientsText.split(',').map(i => i.trim()).filter(i => i);
       payload.append('ingredients', JSON.stringify(ingredientsArray));
+      
+      const tagsArray = tagsText.split(',').map(i => i.trim()).filter(i => i);
+      payload.append('tags', JSON.stringify(tagsArray));
+      
+      const allergensArray = allergensText.split(',').map(i => i.trim()).filter(i => i);
+      payload.append('allergens', JSON.stringify(allergensArray));
+      
       payload.append('nutritionalInfo', JSON.stringify(formData.nutritionalInfo));
       payload.append('isActive', String(formData.isActive));
 
@@ -189,10 +218,7 @@ export default function MealForm({ initialData }: MealFormProps) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-          <textarea required rows={3} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Meal preparation details..." />
-        </div>
+
 
         <div className="grid grid-cols-3 gap-4">
           <div>
@@ -212,6 +238,16 @@ export default function MealForm({ initialData }: MealFormProps) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients (comma separated) *</label>
             <input required type="text" value={ingredientsText} onChange={(e) => setIngredientsText(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Rice, Dal, Ghee" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+            <input type="text" value={tagsText} onChange={(e) => setTagsText(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Warm, Soft, Immunity" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Allergens (comma separated)</label>
+            <input type="text" value={allergensText} onChange={(e) => setAllergensText(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Dairy, Nuts, Gluten" />
           </div>
         </div>
 
@@ -333,6 +369,25 @@ export default function MealForm({ initialData }: MealFormProps) {
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="bg-white mb-8">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description (A+ Content) *</label>
+          <ReactQuill
+            theme="snow"
+            value={formData.description}
+            onChange={(content) => setFormData({ ...formData, description: content })}
+            className="h-64 mb-12"
+            modules={{
+              toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+                ['link'],
+                ['clean']
+              ],
+            }}
+          />
         </div>
 
         <div className="pt-6 border-t border-gray-100 flex justify-end gap-3">

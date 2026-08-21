@@ -21,6 +21,8 @@ interface Meal {
   };
   imageUrl?: string;
   images?: string[];
+  tags?: string[];
+  allergens?: string[];
 }
 
 interface MealViewDrawerProps {
@@ -152,6 +154,56 @@ export default function MealViewDrawer({ isOpen, onClose, meal }: MealViewDrawer
                     )}
                   </div>
                 </div>
+
+                {/* Tags and Allergens */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Tags</h4>
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 min-h-[80px]">
+                      {meal.tags && meal.tags.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {(() => {
+                            let tagsToRender = meal.tags;
+                            try {
+                              if (tagsToRender.length === 1 && tagsToRender[0].startsWith('[')) {
+                                tagsToRender = JSON.parse(tagsToRender[0]);
+                              }
+                            } catch (e) {}
+                            return Array.isArray(tagsToRender) ? tagsToRender.map((tag, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium">{tag}</span>
+                            )) : <p className="text-sm text-gray-500">No tags.</p>;
+                          })()}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No tags.</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Allergens</h4>
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 min-h-[80px]">
+                      {meal.allergens && meal.allergens.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {(() => {
+                            let allergensToRender = meal.allergens;
+                            try {
+                              if (allergensToRender.length === 1 && allergensToRender[0].startsWith('[')) {
+                                allergensToRender = JSON.parse(allergensToRender[0]);
+                              }
+                            } catch (e) {}
+                            return Array.isArray(allergensToRender) ? allergensToRender.map((allergen, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-rose-100 text-rose-700 text-xs rounded-full font-medium">{allergen}</span>
+                            )) : <p className="text-sm text-gray-500">No allergens.</p>;
+                          })()}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No allergens.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
 
                 {/* Description */}
                 <div>
