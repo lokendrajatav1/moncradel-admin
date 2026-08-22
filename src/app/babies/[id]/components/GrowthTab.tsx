@@ -168,7 +168,7 @@ export default function GrowthTab({ babyId }: GrowthTabProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {growthRecords.map(record => (
+                {[...growthRecords].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(record => (
                   <tr key={record._id} className="hover:bg-gray-50">
                     <td className="px-6 py-3 font-medium">{new Date(record.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-3">{record.weight}</td>

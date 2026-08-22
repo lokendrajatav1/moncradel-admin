@@ -11,6 +11,7 @@ interface Coupon {
   code: string;
   discountPercentage: number;
   maxDiscountAmount: number;
+  minOrderAmount: number;
   expiryDate: string;
   isActive?: boolean;
 }
@@ -25,6 +26,7 @@ export default function CouponsPage() {
     code: '',
     discountPercentage: '',
     maxDiscountAmount: '',
+    minOrderAmount: '',
     expiryDate: '',
     isActive: true
   });
@@ -49,7 +51,7 @@ export default function CouponsPage() {
 
   const openCreateModal = () => {
     setEditingCoupon(null);
-    setFormData({ code: '', discountPercentage: '', maxDiscountAmount: '', expiryDate: '', isActive: true });
+    setFormData({ code: '', discountPercentage: '', maxDiscountAmount: '', minOrderAmount: '', expiryDate: '', isActive: true });
     setIsModalOpen(true);
   };
 
@@ -59,6 +61,7 @@ export default function CouponsPage() {
       code: coupon.code,
       discountPercentage: coupon.discountPercentage.toString(),
       maxDiscountAmount: coupon.maxDiscountAmount.toString(),
+      minOrderAmount: coupon.minOrderAmount?.toString() || '0',
       expiryDate: new Date(coupon.expiryDate).toISOString().split('T')[0],
       isActive: coupon.isActive !== false
     });
@@ -73,6 +76,7 @@ export default function CouponsPage() {
         code: formData.code,
         discountPercentage: Number(formData.discountPercentage),
         maxDiscountAmount: Number(formData.maxDiscountAmount),
+        minOrderAmount: Number(formData.minOrderAmount),
         expiryDate: formData.expiryDate,
         isActive: formData.isActive
       };
@@ -89,7 +93,7 @@ export default function CouponsPage() {
       if (data.success) {
         hideAlert();
         setIsModalOpen(false);
-        setFormData({ code: '', discountPercentage: '', maxDiscountAmount: '', expiryDate: '', isActive: true });
+        setFormData({ code: '', discountPercentage: '', maxDiscountAmount: '', minOrderAmount: '', expiryDate: '', isActive: true });
         setEditingCoupon(null);
         fetchCoupons();
         showSuccess(editingCoupon ? 'Coupon updated successfully!' : 'Coupon created successfully!');
@@ -166,6 +170,7 @@ export default function CouponsPage() {
             <div className="space-y-2 text-sm text-gray-600">
               <p><span className="font-semibold text-gray-900">Discount:</span> {coupon.discountPercentage}%</p>
               <p><span className="font-semibold text-gray-900">Max Cap:</span> ₹{coupon.maxDiscountAmount}</p>
+              <p><span className="font-semibold text-gray-900">Min Order:</span> ₹{coupon.minOrderAmount || 0}</p>
               <p><span className="font-semibold text-gray-900">Valid Till:</span> {new Date(coupon.expiryDate).toLocaleDateString()}</p>
             </div>
 
@@ -236,6 +241,17 @@ export default function CouponsPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={formData.maxDiscountAmount}
                 onChange={(e) => setFormData({ ...formData, maxDiscountAmount: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Min Order (₹)</label>
+              <input
+                type="number"
+                required
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.minOrderAmount}
+                onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })}
               />
             </div>
           </div>

@@ -101,7 +101,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       subItems: [
         { name: 'Notification Center', href: '/notifications' },
         { name: 'Support & Helpdesk', href: '/support' },
-        { name: 'Audit Logs', href: '/audit-logs' },
+
         { name: 'System Settings', href: '/settings' },
       ]
     }
